@@ -21,6 +21,7 @@
             var self = this,
                 ui = $.summernote.ui,
                 options = context.options,
+                lang = $.summernote.lang[options.lang],
                 $editor   = context.layoutInfo.editor,
                 $editable = context.layoutInfo.editable;
 
@@ -28,7 +29,7 @@
                 return ui.buttonGroup([
                     ui.button({
                         contents: '<b>H<b>', //ui.icon(options.icons.bold),
-                        tooltip:  'Toggle table header',
+                        //tooltip:  'Toggle table header',
                         click:function (e) {
                             self.toggleTableHeader();
                         }
@@ -52,6 +53,7 @@
                   if(self.observer)
                      self.observer.disconnect(); // see below
                   self.replaceTags($thead.find('th'), 'td')
+                  $thead.find('td').css('font-weight', '');
                   var $theadRows = $thead.find('tr');
                   $table.prepend($theadRows);
                   $thead.remove();
@@ -64,6 +66,7 @@
                   $thead.prependTo($table);
                   $thead.append($topRow);
                   self.replaceTags($thead.find('td'), 'th')
+                  $thead.find('th').css('font-weight', 'bold');
 
                   // Detect changes to the table dom so we can fix the header
                   // after rows or cols are added.  Summernote creates td's only
@@ -94,11 +97,60 @@
             };
 
             this.replaceTags = function($nodes, newTag) {
+              const attrs = this.recoverAttributes($nodes[0]);
               $nodes.replaceWith(function() {
-                return $("<" + newTag + " />", {html: $(this).html()});
+                return $(`<${newTag} ${attrs}>${$(this).html()}</${newTag}>`);
               });
             }
 
+            context.memo('button.tableBorders', function () {
+              return ui.buttonGroup([
+                ui.button({
+                  contents: '<b>B<b>', //ui.icon(options.icons.bold),
+                  //tooltip: 'Table border',
+                  click: function (e) {
+                    self.jBorderColor();
+                  }
+                }),
+              ]).render();
+            });
+      
+            this.jBorderColor = function () {
+              const backColor = 'BLACK';
+              const rng = context.invoke('createRange', $editable);
+              const dom = $.summernote.dom;
+      
+              context.invoke('beforeCommand');
+      
+              var table = dom.ancestor(rng.commonAncestor(), dom.isTable)
+              var $table = $(table);
+      
+              $table.find('th, td').css('border', '1px solid ' + backColor);
+             
+              context.invoke('afterCommand');
+            };
+
+            this.recoverAttributes= function(el) {
+              let resultStr = '';
+          
+              if (!el) {
+                return resultStr;
+              }
+          
+              const attrList = el.attributes || [];
+          
+              for (let i = 0; i < attrList.length; i++) {
+                if (attrList[i].name.toLowerCase() === 'id') {
+                  continue;
+                }
+          
+                if (attrList[i].specified) {
+                  resultStr += ' ' + attrList[i].name + '=\'' + attrList[i].value + '\'';
+                }
+              }
+          
+              return resultStr;
+            }
         }
     });
 }));
