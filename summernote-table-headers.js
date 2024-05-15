@@ -21,15 +21,18 @@
             var self = this,
                 ui = $.summernote.ui,
                 options = context.options,
-                lang = $.summernote.lang[options.lang],
+                lang      = options.langInfo,
+                $note     = context.layoutInfo.note,
                 $editor   = context.layoutInfo.editor,
                 $editable = context.layoutInfo.editable;
 
             context.memo('button.tableHeaders', function () {
                 return ui.buttonGroup([
                     ui.button({
-                        contents: '<b>H<b>', //ui.icon(options.icons.bold),
-                        //tooltip:  'Toggle table header',
+                        container: options.container,
+                        className: 'btn-md',
+                        contents: '<b>H</b>', //ui.icon(options.icons.bold),
+                        tooltip:  'Toggle table header',
                         click:function (e) {
                             self.toggleTableHeader();
                         }
@@ -106,8 +109,10 @@
             context.memo('button.tableBorders', function () {
               return ui.buttonGroup([
                 ui.button({
+                  container: options.container,
+                  className: 'btn-md',
                   contents: '<b>B<b>', //ui.icon(options.icons.bold),
-                  //tooltip: 'Table border',
+                  tooltip: 'Table border',
                   click: function (e) {
                     self.jBorderColor();
                   }
